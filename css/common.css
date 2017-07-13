@@ -1,0 +1,93 @@
+html {
+	font: normal 100%/1.4 Georgia,serif;
+}
+
+* {
+	border: 1px solid red !important;
+	margin: 0px;
+	padding: 0px;
+}
+
+ul {
+	list-style: none;
+
+    margin: 0;
+    padding: 0;
+}
+
+a {
+	text-decoration: none;
+    color: white;
+    transition: color 0.3s ease;
+    background-color: transparent;
+}
+
+a:hover {
+	color: grey;
+}
+.page-cover {
+	width: 100%;
+	padding-left: 0;
+	padding-right: 0;
+	background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    min-height: 500px;
+    background-image: url(/img/57935150_p0.jpg);
+    margin-bottom: 40px;
+}
+
+.page-about {
+	height: 300px;
+	margin-bottom: 40px;
+}
+
+.content-container {
+	height: 300px;
+}
+
+.page-navi {
+    text-shadow: 1px 1px 5px rgba(0,0,0,0.5);
+}
+
+.navi-list {
+	height: 100%;
+	padding-top: 5px;
+	display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.navi-list>li {
+	margin-right: 15px;
+}
+
+.navi-text {
+	text-align: center;
+	margin-top: 110px;
+}
+
+.text-para {
+	text-align: center;
+}
+
+.about-text {
+	text-align: center;
+}
+
+.content-block {
+	height: 100%;
+}
+
+.float-right {
+	float: right;
+}
+
+.float-left {
+	float: left;
+}
+
+.current {
+	background-color: #000531;
+	color: #fff;
+}
