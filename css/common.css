@@ -43,7 +43,7 @@ a:hover {
 }
 
 .content-container {
-	height: 300px;
+	height: 30em;
 }
 
 .page-navi {
@@ -77,6 +77,7 @@ a:hover {
 
 .content-block {
 	height: 100%;
+	width: 50%;
 }
 
 .float-right {
@@ -90,4 +91,15 @@ a:hover {
 .current {
 	background-color: #000531;
 	color: #fff;
+}
+
+.feature-col-center {
+	width: 100%;
+	position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.content-title {
+	text-align: center;
 }
