@@ -1,0 +1,185 @@
+---
+layout: blog
+---
+
+<div class="blog-body">
+	<div style="background-image: url({{site.baseurl}}/img/general/profile_bg.png);" class="blog-cover">
+		<div class="info-table">
+			<div class="center">
+				<img style="border-radius: 100%; border: 5px solid #f1f1f1; */" class="block-center" src="{{site.baseurl}}/img/general/profile_pic.png">
+				<div class="block-center text-center">
+					<h3 style="color: #f7ca9e;">Seuphor</h3>
+					<p style="font-weight: bold; color: #e06c06;">Data & 3D Modeling</p>
+					<p style="color: #f7ca9e;">A random person who loves designing awesome things. Having some experience of Python, C#, Unity, C4D, Photoshop, After Effect</p>
+				</div>
+				<div class="center">
+					<ul class="blog-nav">
+						<li>
+							<a style="color: #f7ca9e;" href="https://github.com/seuphor">Github</a>
+						</li>
+						<li>
+							<a style="color: #f7ca9e;" href="http://space.bilibili.com/348002?from=search&seid=1219523313562168988#!/">BiliBili</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="blog-content container">
+		<div class="blog-head text-center">
+			<h2>Generating Faces Using GANs</h2>
+			<p>2017-08-08 @ 12:22:30</p>
+		</div>
+		<div class="blog-container">
+			<div class="bigger-header">
+				1. Initiatives & Brief Intro
+			</div>
+
+			<div class="text-body">
+				&emsp; Even though deep learning architecture / algorithm can achieved very exciting result, these result can only be achieved when we have comparatively large and well-labeled dataset. When I try to implement some of deep learning algorithm for some anime-related tasks, I found out that it is very hard to find well-documented dataset and I am forced to collect and label all the training / validation samples by myself, which is very inefficient. As the time pass by, I start to wonder if there is some way for neural net to generate training samples by itself after seeing a subset of similar samples. <br><br>
+
+				&emsp; Reading some of generative models in the field of deep learning, I noticed that Generative adversarial Neural Network can be used to generate imagained data based on the data it saw previously. Since I am very curious about how good this neural network can be, I use implemented an automatic face generation algorithm using GANs. <br><br>
+			</div>
+
+			<div class="bigger-header">
+				2. Tools
+			</div>
+
+			<div class="text-body">
+				Language:<br>
+					&emsp; Python<br><br>
+				Package:<br>
+					&emsp; Tensorflow - Building & Training CNNs<br>
+					&emsp; Numpy - General Usage<br>
+			</div>
+
+			<div class="bigger-header">
+				3. Prerequisite
+			</div>
+
+			<div class="text-body">
+				&emsp; In order to understand the basic ideas and algorithms behind deep learning style transfer, you need to have basic understanding on linear algebra and calculus. Feel free to "google" Generative Adversarial Neural Network for further detailed explanantion.
+			</div>
+
+			<div class="bigger-header">
+				5. CNNs Architecture:
+			</div>
+
+			<div class="text-body">
+				&emsp; The basic idea behind Generative Adversarial Neural Network is that instead of having a single Neural Network pipeline for doing classification, the overall architecture is consist of a discriminator network (a binary-classification network to identify whether the input image is real or fake) and a generator (a generative network that generate imaginary image based on white noise input). The logic can be briefly summarized as follow, even though the generator is very poor at generating imagined image at the beginning, after the training over time, discriminator become better at identifying the fake image from the real one and generator become better at generating real images in order to battle against the discriminator. At the end, the generator is preserved while the discriminator head is discarded for generating purpose.
+			</div>
+
+			<div class="img-container">
+				<img class="img-auto" src="{{site.baseurl}}/img/gans/generative-adversarial-network">
+			</div>
+
+			<div class="smaller-header">
+				A. Detect CNN:
+			</div>
+
+			<div class="text-body">
+				Concept & Processing CNN input:<br>
+					&emsp; One of challenge for implementing this kind of architecture is how to process image input during training process. Of course, we cannot feed the whole image into the neural net since it is really difficult for CNN to "know" which part is the face if only a small part of our input picture is the face. To solve this problem, I crop out the part that only contains the face and marked it as a positive training sample. For negative training samples, I just loop through all negative images (background images that do not have faces in them) and sample 36 windows (randomly sized) for each image and store them as negative samples. Afterwards, we can concate positive as well as nagative samples and feed them into Detection CNN.<br>
+
+					&emsp; Type: binary classification<br><br>
+				Main Purpose:<br>
+					&emsp; Detect CNN here is a binary classification CNN to tell whether a suggested box contains a face or not.
+			</div>
+
+			<div class="smaller-header">
+				B. Calibration CNN:
+			</div>
+
+			<div class="text-body">
+				Concept & Processing CNN input:<br>
+					&emsp; Sometimes, the output from Detection CNN will be a little bit off, which means that Detection CNN selected half of the face instead of a complete face. Here, Calibration CNN is used to adjust the suggested windows that output from Detection CNN. For specific implementation, I used scaled matrix suggested by **REFERENCE PAPER**. I will not get into the detail of how this is achieved. (you can look at my codes for specific implementation). If you are interested in concept, I recommend you to read through their research paper.<br>
+					
+					T&emsp; ype: 45 classes classification.<br><br>
+				Main Purpose:<br>
+					&emsp; Calibration CNN here is a 45 classification CNN to adjust and scale poorly suggested window to fit complete face. Here I attach two pictures from a reaserch paper called "A Convolutional Neural Network Cascade for Face Detection" by Li et al. to illustrate the purpose of Calib CNN. (Blue is the suggested box by Detect CNN and Red is the same bounding box but adjusted by Calib CNN)
+			</div>
+
+			<div class="img-container">
+				<img class="img-auto-small" src="{{site.baseurl}}/img/cascade_cnn/calib_net.png">
+			</div>
+
+			<div class="smaller-header">
+				C. NMS:
+			</div>
+			
+			<div class="text-body">
+				Concept: <br>
+					&emsp;  NMS is a algorithm to get rid of overlapping windows. I will not discuss it in this blog since it is not related to the concept of deep learning.
+			</div>
+
+			<div class="smaller-header">
+				D. 3-Sized CNN:
+			</div>
+
+			<div class="text-body">
+				&emsp; As you may notice, in Cascade CNN architecture, input size of cascade CNN is increment by multiplication of 2 as you go deeper into the Neural Net. In first CNN layer, CNN takes 12x12 pixels image as input. In the second one, CNN takes 24x24 pixels image as input. And at last, CNN takes 48x48 pixels image as input. This allows CNN to process different detail of the image in different time step. For instance, the eyes and mouth is not clear in 12x12 pixels image, the CNN probably learn to distinguish faces by color, which may generate a lot false positive suggested windows. However, these false positive suggestion will be denied at later Cascade CNN since they accept more detailed image as inputs. (they can process the shape of the face, eyes and mouths)
+			</div>
+
+			<div class="smaller-header">
+				6. CNNs Layers:
+			</div>
+
+			<div class="text-body">
+				&emsp; I will not get into details about CNNs layers. Rather, I will briefly discuss functions of these layers I used in CNN.<br><br>
+	
+				<b>CONV LAYER:</b>
+					Applys a filter window (a lot less in terms of size compare to image size) on the image. While moving this filter on the image, it will do elementary-wise multiplication with image value and generate different feature maps.<br><br>
+				<b>MAX POOL LAYER:</b>
+					Reduce the size of the input image from previous layers. This technique is used for later conv layer to capture larger part of image with same filter size.<br><br>
+				<b>CONV FULLY CONNECTED LAYER:</b>
+					Instead of fully connected layers, I decide to use conv fully connected layers which allows CNN to be flexible with different size of input. (Say your fully connected layers take [batch_size, 128] matrix and convert it to [batch_size, 784] matrix. If you use only fully connected layers instead of conv_fc your Neural Net only can perform calculation only if the previous layer before FC layer has size of 128. Since in the real world, we always get different size of image, it is better in this case to implement conv_fc layer.<br><br>
+				<b>BATCH NORMALIZATION LAYER:</b>
+					Normalized the output from previous layer before feeding into next activation layers. Not only will prevent vanishing gradient problem but also will gitter training sample representation in the batch which may have some extra regularization effect.
+			</div>
+
+			<div class="smaller-header">
+				7. Result Presentation:
+			</div>
+
+			<div class="text-body">
+				&emsp; Here I provide some visual presentation about how the face recognition is done using self-built Cascade CNN. (Original_input -> After First Cascade CNN -> After Second Cascade CNN -> After Third Cascade CNN)
+			</div>
+
+			<div class="img-container">
+				<img class="img-auto" src="{{site.baseurl}}/img/cascade_cnn/Complete_feed.jpg">
+			</div>
+
+			<div class="smaller-header">
+				7. Acknowledge & Reference:
+			</div>
+
+			<div class="text-body">
+				<a class="credit-source" href="http://www.pyimagesearch.com/2015/02/16/faster-non-maximum-suppression-python/">(Faster) Non-Maximum Suppression in Python</a> BY by <b>Adrian Rosebrock</b><br><br>
+				<a class="credit-source" href="http://www.pyimagesearch.com/2015/02/16/faster-non-maximum-suppression-python/">A Convolutional Neural Network Cascade for Face Detection</a> BY <b>Li et al.</b>
+			</div>
+
+			<div class="smaller-header">
+				8. Future Revision & Possibility:
+			</div>
+
+			<div class="text-body">
+				&emsp; One of way to build a better model is to feed more training samples into CNNs. However, generating these training samples and training them will be very time consuming. For now, I have yet to labeled anime images for training. I hope there will be some in future.<br><br>
+
+				&emsp; As for practical possibility, this network can definitely help anime website to distinguish between background images and images with faces. In addition, we can take a step further to use another CNNs to classify the facial expression of each faces which provides another filtering options for website users.
+			</div>
+
+			<div class="smaller-header">
+				8. Next Up:
+			</div>
+
+			<div class="text-body">
+				&emsp; I am thinking of using Bi-directional RNN with attention mechanism to build simple Q & A chatbot which is trained using Japanese anime scripts or Japanese movie scripts. However, finding training data might be a challenge. I will need to take some time to explore and see what I can find. Likewise, once I finalize the network, I will probably write another summary blog like this. Thanks for reading.
+			</div>
+
+			<div class="smaller-header">
+				
+			</div>
+		</div>
+	</div>
+</div>
