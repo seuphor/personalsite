@@ -118,53 +118,27 @@ layout: blog
 			</div>
 
 			<div class="text-body">
-				1. Loss Function:
-					&emsp; The loss function of the overall architecture in this case will be: Total Loss = a * L(content) + b * L(style) + c * L(denoise). a, b, c are weighting factors for content, style, denoise loss. Using different weighting factors will result in different output pictures. I decide to use L-BFGS for optimization because this optimizer takes second-order derivatives into account when updating pixel values, which allows the network to come up with more refined images.
-				2. Style vs. Content:
+				a. Loss Function: <br>
+					&emsp; The loss function of the overall architecture in this case will be: <b>Total Loss = a * L(content) + b * L(style) + c * L(denoise)</b>. a, b, c are weighting factors for content, style, denoise loss. Using different weighting factors will result in different output pictures. I decide to use L-BFGS for optimization because this optimizer takes second-order derivatives into account when updating pixel values, which allows the network to come up with more refined images. <br><br>
+				b. Style vs. Content: <br>
 					&emsp; Choosing different values for a, b, c will produce different blended images. Normally, in this architecture, I recommend to use 5.0 for a, 1,000 for b, and .01 for c. Using lower b value for optimization process will result in a mixed picture that is very similar to the base image. However, using very high b value will produce a image that has very weird structures and the overall layout in base image cannot be found in the generated images.
 			</div>
 
 			<div class="smaller-header">
-				7. Result Presentation:
+				6. Acknowledge & Reference:
 			</div>
 
 			<div class="text-body">
-				&emsp; Here I provide some visual presentation about how the face recognition is done using self-built Cascade CNN. (Original_input -> After First Cascade CNN -> After Second Cascade CNN -> After Third Cascade CNN)
-			</div>
-
-			<div class="img-container">
-				<img class="img-auto" src="{{site.baseurl}}/img/cascade_cnn/Complete_feed.jpg">
+				<a class="credit-source" href="http://www.cv-foundation.org/openaccess/content_cvpr_2016/papers/Gatys_Image_Style_Transfer_CVPR_2016_paper.pdf">Image Style Transfer Using Convolutional Neural Networks</a> BY by <b>Leon et al.</b><br><br>
+				<a class="credit-source" href="https://arxiv.org/pdf/1606.05897.pdf">Preserving Color in Neural Artistic Style Transfer</a> BY <b>Leon et al.</b>
 			</div>
 
 			<div class="smaller-header">
-				7. Acknowledge & Reference:
+				7. Future Possibility:
 			</div>
 
 			<div class="text-body">
-				<a class="credit-source" href="http://www.pyimagesearch.com/2015/02/16/faster-non-maximum-suppression-python/">(Faster) Non-Maximum Suppression in Python</a> BY by <b>Adrian Rosebrock</b><br><br>
-				<a class="credit-source" href="http://www.pyimagesearch.com/2015/02/16/faster-non-maximum-suppression-python/">A Convolutional Neural Network Cascade for Face Detection</a> BY <b>Li et al.</b>
-			</div>
-
-			<div class="smaller-header">
-				8. Future Revision & Possibility:
-			</div>
-
-			<div class="text-body">
-				&emsp; One of way to build a better model is to feed more training samples into CNNs. However, generating these training samples and training them will be very time consuming. For now, I have yet to labeled anime images for training. I hope there will be some in future.<br><br>
-
-				&emsp; As for practical possibility, this network can definitely help anime website to distinguish between background images and images with faces. In addition, we can take a step further to use another CNNs to classify the facial expression of each faces which provides another filtering options for website users.
-			</div>
-
-			<div class="smaller-header">
-				8. Next Up:
-			</div>
-
-			<div class="text-body">
-				&emsp; I am thinking of using Bi-directional RNN with attention mechanism to build simple Q & A chatbot which is trained using Japanese anime scripts or Japanese movie scripts. However, finding training data might be a challenge. I will need to take some time to explore and see what I can find. Likewise, once I finalize the network, I will probably write another summary blog like this. Thanks for reading.
-			</div>
-
-			<div class="smaller-header">
-				
+				&emsp; 	Comparing style transfer of deep learning framework with the other algorithm, I found out that neural network provide more flexibility and generate more refined output image. The downside of this method is that the process takes a considerable amount of time (8 mins in Nvidia GTX 960 GPU). Nevertheless, since the transfer learning (feature representation of VGG19) can be generalized into different tasks, it is really likely that this kind of optimization techniques can be used for image analogy (swaping the nose / eyes of one picture with the nose / eyes of another pictures) or content-aware patching (taking surrounding pixel information as reference to fill the target area). 
 			</div>
 		</div>
 	</div>
