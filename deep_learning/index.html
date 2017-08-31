@@ -28,8 +28,8 @@ layout: blog
 
 	<div class="blog-content container">
 		<div class="blog-head text-center">
-			<h2>Style Transfer with VGG</h2>
-			<p>2017-05-25 @ 15:18:01</p>
+			<h2>Anime Face Recognition Using Cascade CNN</h2>
+			<p>2017-07-14 @ 23:58:40</p>
 		</div>
 		<div class="blog-container">
 			<div class="bigger-header">
@@ -37,9 +37,11 @@ layout: blog
 			</div>
 
 			<div class="text-body">
-				&emsp; As we all know, there are a lot softwares for photo / video editting. However, mastering the concept of photo editting is very time-consuming and requires the decent knowledge of aesthetics. After learning the concept of Convolutional Neural Network, I am wondering if we can use convolutional neural net to automatically generate some images that is not ubiquitous aesthetically pleasing for people. The first idea that comes into my mind is doing style transfer for images (that is to transfer style from one specific image to another image). Since CNN is widely used for object detection and object classification, I think the same architecture can be used for image style transfer with appropriate changes in the pipeline.<br><br>
+				&emsp; I used to spend a lot of time browsing thousands of anime image every day. Since I am making anime clips and 3D anime scene modeling, I find it is very helpful to glance through others' works along the way to get some inspiration from these artworks (such as coloring, architecture, facial expression, object arrangement, texture, etc). After learning some of deep learning concepts by myself, I thought it might be a lot fun if I can implement / build Neural NetWork for practical usage. During my exploration, facial recognition of anime picture came into my mind. So I decide to try CNN architecture and see if I can really make this work.<br><br>
 
-				&emsp; After spending some time, perusing the related research paper. I am able to implement deep learning style transfer algorithm in python. I will discuss more about implementation detail in the following section.
+				&emsp; After spending approximate one month, I succeed in building a CNN architecture (Cascade CNNs) from scratch to perform decent face recognition for anime picture. At the beginning, I think it is pretty impossible for me to get this done because I was neither computer science major nor math major student (a psychology and Japanese major student from nowhere). However, the end result is a surprise for me and I decide to write this blog to share some of my thoughts and what I have learnt about this journey. (approximate 3000 - 5000 lines of python codes)<br><br>
+
+				&emsp; If you are <b>not interested</b> in the mechanism of CNN and just want to see what it can do, <b>feel free to skip to the Presentation Section</b>.
 			</div>
 
 			<div class="bigger-header">
@@ -51,7 +53,7 @@ layout: blog
 					&emsp; Python<br><br>
 				Package:<br>
 					&emsp; Tensorflow - Building & Training CNNs<br>
-					&emsp; OpenCV - Processing Image Input & Output<br>
+					&emsp; Pillow - Processing Image Input & Output<br>
 					&emsp; Numpy - General Usage<br>
 			</div>
 
@@ -60,37 +62,57 @@ layout: blog
 			</div>
 
 			<div class="text-body">
-				&emsp; In order to understand the basic ideas and algorithms behind deep learning style transfer, you need to have basic understanding on linear algebra and calculus. If you are confused about different layers inside Convolutional Neural Network (such as convoltional layer, rectified layer, max-pooling layer, etc), I recommend you to use google search engine for detailed explaination.
+				&emsp; In order to understand the general mechanism of my Cascade CNN architeture, you probably need to have basic understanding of CNN (Convolution Neural Network). I am 100% sure that <b>GOOGLE</b> will explain this concept a lot clearly and can be easily understood. If you are curious about basic concept behind CNN, I recommend you to utilize the google search engine to learn this concept.
 			</div>
 
 			<div class="bigger-header">
-				4. CNN Architecture:
+				4. Basics Behind Facial Recognition:
 			</div>
 
 			<div class="text-body">
-				&emsp; The overall CNN architecture for style transfering I used in this implementation is the same as VGG-19, which consist of 5 pooling layers for down-sampling + several convoluational layers. The last feature extractor layer has 512 channels (512 dimensions of feature representation). The reason why we use VGG-19 architecture is that when convolutional neural networks are trained for object recognition, the neural network learns semantic representation of various object across the training samples. Later, these feature representation of objects can be used in style transfer task to define which pixels in the target image should be changed based on feature representation of style images and how should they change.<br><br>
+				&emsp; Before diving into Cascade CNN architecture, I think it would be better to give you a brief introduction to concepts behind facial recognition. (Here we only focus on how to process output) <br><br>
 
-				&emsp; Because training a convolutional neural net from scratch is very time-consuming and requires a lot training samples to fine-tune the parameters, I decide to use pre-trained Neural Net parameters for the sake of the time. Here I attach architectures from a reaserch paper called "Image Style Transfer Using Convolutional Neural Networks".
+				&emsp; Ignoring the specific architectures of CNN or other facial recognition mechanism, generally, CNN's output will be structured into 1x4 dimension vectors (x, y, image height, image width). x here refers to the top left axis along height of image. y refers to the top left axis along width of image. With these 4 different values, the mechine will be able to calculate and draw bounding-box around the target pixels which it considers to be "face".
+			</div>
+
+			<div class="bigger-header">
+				5. CNNs Architecture:
+			</div>
+
+			<div class="text-body">
+				&emsp; Simple CNN (2 convolutional layers + 1 or 2 max pooling + 1 or 2 fully connected layers) can fulfill simple task such as image classification. However, in this case, I am using CNN for facial recognition which means the output of CNN should be a regressor instead of classifers. Moreover, a simple CNN may not be able to capture all the features of the face to perform decent facial recognition. Because of these reasons, I have to find more complex Neural Net architectures. <br><br>
+
+				&emsp; Different from a single CNN, Cascade CNN is consist of multiple simple CNNs and each of them is used to perform different tasks. If we unrolled the Cascade CNN, its architecture looks like the following:
 			</div>
 
 			<div class="img-container">
-				<img class="img-auto" src="{{site.baseurl}}/img/style-transfer/neural_style.png">
+				<img class="img-auto" src="{{site.baseurl}}/img/cascade_cnn/network_architecture.png">
 			</div>
 
 			<div class="smaller-header">
-				A. Parameters For Optimization:
+				A. Detect CNN:
 			</div>
 
 			<div class="text-body">
-				&emsp; Instead of outputing class score for object classification, the main goal of our network is to produce a mixed-stylized image that is the same size of original image. Therefore, rather than optimizing weights and bias in each convoluational layers. We want to optimize pixel value in generated image to make it look similar to base image (using content loss) and the style image (using style loss)
+				Concept & Processing CNN input:<br>
+					&emsp; One of challenge for implementing this kind of architecture is how to process image input during training process. Of course, we cannot feed the whole image into the neural net since it is really difficult for CNN to "know" which part is the face if only a small part of our input picture is the face. To solve this problem, I crop out the part that only contains the face and marked it as a positive training sample. For negative training samples, I just loop through all negative images (background images that do not have faces in them) and sample 36 windows (randomly sized) for each image and store them as negative samples. Afterwards, we can concate positive as well as nagative samples and feed them into Detection CNN.<br>
+
+					&emsp; Type: binary classification<br><br>
+				Main Purpose:<br>
+					&emsp; Detect CNN here is a binary classification CNN to tell whether a suggested box contains a face or not.
 			</div>
 
 			<div class="smaller-header">
-				B. Content Representation:
+				B. Calibration CNN:
 			</div>
 
 			<div class="text-body">
-				&emsp; In Convolutional Neural Network, each layer stores some information of original images. Therefore, we can use these feature representation that is generated by feeding raw image into CNN to evaluate content of the image (what specific object exist in the image). To visualize the difference of two images, one can inject both of the image into CNN and compare one image's output of the feature maps to those of another images. Follow this logic, we can define the loss between two images by measuring the euclidean distance of the values in feature maps. Using this loss function, we can update the pixel value for our generated image. In this case, we use feature representation of conv4_2 for content loss evaluation
+				Concept & Processing CNN input:<br>
+					&emsp; Sometimes, the output from Detection CNN will be a little bit off, which means that Detection CNN selected half of the face instead of a complete face. Here, Calibration CNN is used to adjust the suggested windows that output from Detection CNN. For specific implementation, I used scaled matrix suggested by **REFERENCE PAPER**. I will not get into the detail of how this is achieved. (you can look at my codes for specific implementation). If you are interested in concept, I recommend you to read through their research paper.<br>
+					
+					T&emsp; ype: 45 classes classification.<br><br>
+				Main Purpose:<br>
+					&emsp; Calibration CNN here is a 45 classification CNN to adjust and scale poorly suggested window to fit complete face. Here I attach two pictures from a reaserch paper called "A Convolutional Neural Network Cascade for Face Detection" by Li et al. to illustrate the purpose of Calib CNN. (Blue is the suggested box by Detect CNN and Red is the same bounding box but adjusted by Calib CNN)
 			</div>
 
 			<div class="img-container">
@@ -98,30 +120,37 @@ layout: blog
 			</div>
 
 			<div class="smaller-header">
-				C. Style Representation:
+				C. NMS:
 			</div>
 			
 			<div class="text-body">
-				&emsp;  Different from content representation, which is the euclidean distance of values in feature maps between two images. The style representation of a image can be defined by using feature correlation matrix (by the transpose of feature map matrix multiply by feature map matrix itself). Then, style loss is defined by evaluatin the difference of feature correlation matrix between two images. We use this measurement because intuitively if two image is very similar in terms of the style, their feature correlation matrix should be very similar.
+				Concept: <br>
+					&emsp;  NMS is a algorithm to get rid of overlapping windows. I will not discuss it in this blog since it is not related to the concept of deep learning.
 			</div>
 
 			<div class="smaller-header">
-				D. Image Denoise:
+				D. 3-Sized CNN:
 			</div>
 
 			<div class="text-body">
-				&emsp; To generate a pleasing picture using CNN, we need to make sure that the images is denoised to avoid random ugly pixels that is incompatible within the mood of the picture. Besides, loss function for content and style representation, we add one more loss function to evaluate the variation of the target pixel and its near-by pixel to reduce the noise of the image.
+				&emsp; As you may notice, in Cascade CNN architecture, input size of cascade CNN is increment by multiplication of 2 as you go deeper into the Neural Net. In first CNN layer, CNN takes 12x12 pixels image as input. In the second one, CNN takes 24x24 pixels image as input. And at last, CNN takes 48x48 pixels image as input. This allows CNN to process different detail of the image in different time step. For instance, the eyes and mouth is not clear in 12x12 pixels image, the CNN probably learn to distinguish faces by color, which may generate a lot false positive suggested windows. However, these false positive suggestion will be denied at later Cascade CNN since they accept more detailed image as inputs. (they can process the shape of the face, eyes and mouths)
 			</div>
 
 			<div class="smaller-header">
-				5. Optimization:
+				6. CNNs Layers:
 			</div>
 
 			<div class="text-body">
-				1. Loss Function:
-					&emsp; The loss function of the overall architecture in this case will be: Total Loss = a * L(content) + b * L(style) + c * L(denoise). a, b, c are weighting factors for content, style, denoise loss. Using different weighting factors will result in different output pictures. I decide to use L-BFGS for optimization because this optimizer takes second-order derivatives into account when updating pixel values, which allows the network to come up with more refined images.
-				2. Style vs. Content:
-					&emsp; Choosing different values for a, b, c will produce different blended images. Normally, in this architecture, I recommend to use 5.0 for a, 1,000 for b, and .01 for c. Using lower b value for optimization process will result in a mixed picture that is very similar to the base image. However, using very high b value will produce a image that has very weird structures and the overall layout in base image cannot be found in the generated images.
+				&emsp; I will not get into details about CNNs layers. Rather, I will briefly discuss functions of these layers I used in CNN.<br><br>
+	
+				<b>CONV LAYER:</b>
+					Applys a filter window (a lot less in terms of size compare to image size) on the image. While moving this filter on the image, it will do elementary-wise multiplication with image value and generate different feature maps.<br><br>
+				<b>MAX POOL LAYER:</b>
+					Reduce the size of the input image from previous layers. This technique is used for later conv layer to capture larger part of image with same filter size.<br><br>
+				<b>CONV FULLY CONNECTED LAYER:</b>
+					Instead of fully connected layers, I decide to use conv fully connected layers which allows CNN to be flexible with different size of input. (Say your fully connected layers take [batch_size, 128] matrix and convert it to [batch_size, 784] matrix. If you use only fully connected layers instead of conv_fc your Neural Net only can perform calculation only if the previous layer before FC layer has size of 128. Since in the real world, we always get different size of image, it is better in this case to implement conv_fc layer.<br><br>
+				<b>BATCH NORMALIZATION LAYER:</b>
+					Normalized the output from previous layer before feeding into next activation layers. Not only will prevent vanishing gradient problem but also will gitter training sample representation in the batch which may have some extra regularization effect.
 			</div>
 
 			<div class="smaller-header">
